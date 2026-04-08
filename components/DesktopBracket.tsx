@@ -149,12 +149,6 @@ interface DesktopBracketProps {
 
 export default function DesktopBracket({ matchups, onVoteSuccess }: DesktopBracketProps) {
   const rounds = [1, 2, 3, 4, 5];
-  const connectors: Array<{ from: number; to: number }> = [
-    { from: 1, to: 2 },
-    { from: 2, to: 3 },
-    { from: 3, to: 4 },
-    { from: 4, to: 5 },
-  ];
 
   return (
     <div className="overflow-x-auto pb-4">
