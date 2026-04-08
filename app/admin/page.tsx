@@ -84,9 +84,12 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ matchupId }),
     });
+    const data = await res.json();
     if (res.ok) {
       showMessage('Votes reset');
       await fetchBracket();
+    } else {
+      showMessage(`Error: ${data.error ?? res.status}`);
     }
     setLoading(false);
   };

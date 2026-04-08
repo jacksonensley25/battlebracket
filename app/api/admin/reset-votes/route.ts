@@ -16,12 +16,13 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient();
 
-  const [votesRes, fpRes] = await Promise.all([
+  const [votesRes, fpRes, matchupRes] = await Promise.all([
     supabase.from('votes').delete().eq('matchup_id', matchupId),
     supabase.from('vote_fingerprints').delete().eq('matchup_id', matchupId),
+    supabase.from('matchups').update({ winner_id: null }).eq('id', matchupId),
   ]);
 
-  if (votesRes.error || fpRes.error) {
+  if (votesRes.error || fpRes.error || matchupRes.error) {
     return NextResponse.json({ error: 'Failed to reset votes' }, { status: 500 });
   }
 
