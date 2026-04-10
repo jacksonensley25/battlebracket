@@ -14,9 +14,7 @@ export default function BracketView({ initialMatchups }: BracketViewProps) {
   const [matchups, setMatchups] = useState<Matchup[]>(initialMatchups);
   const [activeRound, setActiveRound] = useState<number>(() => {
     const openRound = initialMatchups.find((m) => m.voting_open)?.round;
-    if (openRound) return openRound;
-    const populated = initialMatchups.filter((m) => m.brand_a_id || m.brand_b_id);
-    return populated.length > 0 ? Math.max(...populated.map((m) => m.round)) : 1;
+    return openRound ?? 1;
   });
 
   const rounds = [1, 2, 3, 4, 5];
