@@ -35,6 +35,17 @@ export default function MatchupCard({ matchup, onVoteSuccess }: MatchupCardProps
   const handleSubmit = async () => {
     if (!selectedBrandId || submitting) return;
     setSubmitting(true);
+
+    const isVotingForA = selectedBrandId === matchup.brand_a_id;
+    console.log('[vote] submitting', {
+      selectedBrandId,
+      brand_a_id: matchup.brand_a_id,
+      brand_b_id: matchup.brand_b_id,
+      brand_a_name: matchup.brand_a?.name,
+      brand_b_name: matchup.brand_b?.name,
+      votingFor: isVotingForA ? matchup.brand_a?.name : matchup.brand_b?.name,
+    });
+
     try {
       const res = await fetch('/api/vote', {
         method: 'POST',

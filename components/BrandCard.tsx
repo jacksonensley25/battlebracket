@@ -61,6 +61,9 @@ export default function BrandCard({
         {!onSelect && isChosen && !isWinner && !isLoser && (
           <span className="text-accent text-xs flex-shrink-0">✓</span>
         )}
+        <span className="text-muted text-xs flex-shrink-0 tabular-nums">
+          #{brand.seed}
+        </span>
         <span
           className={`text-sm font-bold truncate ${
             isWinner ? 'text-accent' : isLoser ? 'text-muted' : 'text-foreground'
