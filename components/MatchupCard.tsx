@@ -63,6 +63,12 @@ export default function MatchupCard({ matchup, onVoteSuccess }: MatchupCardProps
 
   const isTBD = !matchup.brand_a && !matchup.brand_b;
   const totalVotes = localCountA + localCountB;
+  const selectedBrand =
+    selectedBrandId === matchup.brand_a_id
+      ? matchup.brand_a
+      : selectedBrandId === matchup.brand_b_id
+      ? matchup.brand_b
+      : null;
 
   if (isTBD) {
     return (
@@ -118,7 +124,11 @@ export default function MatchupCard({ matchup, onVoteSuccess }: MatchupCardProps
             disabled={!selectedBrandId || submitting}
             className="w-full h-7 text-xs font-bold bg-accent hover:bg-accent-hover text-white rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Submitting…' : 'Submit Vote'}
+            {submitting
+            ? 'Submitting…'
+            : selectedBrand
+            ? `Vote for ${selectedBrand.name}`
+            : 'Select a brand above'}
           </button>
         </div>
       </div>
