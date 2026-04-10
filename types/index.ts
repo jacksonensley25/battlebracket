@@ -14,6 +14,7 @@ export interface Matchup {
   brand_b_id: string | null;
   winner_id: string | null;
   voting_open: boolean;
+  voting_ends_at: string | null;
   created_at: string;
   brand_a?: Brand | null;
   brand_b?: Brand | null;

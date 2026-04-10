@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Matchup, ROUND_NAMES } from '@/types';
 import MatchupCard from './MatchupCard';
 import DesktopBracket from './DesktopBracket';
+import CountdownTimer from './CountdownTimer';
 
 interface BracketViewProps {
   initialMatchups: Matchup[];
@@ -20,6 +21,9 @@ export default function BracketView({ initialMatchups }: BracketViewProps) {
 
   const rounds = [1, 2, 3, 4, 5];
 
+  // Find the active round's end time (all matchups in a round share the same voting_ends_at)
+  const activeTimer = matchups.find((m) => m.voting_open && m.voting_ends_at) ?? null;
+
   const handleVoteSuccess = (matchupId: string, voteCountA: number, voteCountB: number) => {
     setMatchups((prev) =>
       prev.map((m) =>
@@ -28,11 +32,32 @@ export default function BracketView({ initialMatchups }: BracketViewProps) {
     );
   };
 
+  const handleTimerExpire = useCallback(async () => {
+    // Tell the server to close expired rounds
+    await fetch('/api/close-expired', { method: 'POST' });
+
+    // Refresh bracket state from server
+    const res = await fetch('/api/bracket');
+    const data = await res.json();
+    if (data.matchups) setMatchups(data.matchups);
+  }, []);
+
   const roundMatchups = (round: number) =>
     matchups.filter((m) => m.round === round).sort((a, b) => a.slot - b.slot);
 
   return (
     <>
+      {/* Countdown timer — shown when a round is active */}
+      {activeTimer && (
+        <div className="-mx-4 mb-5">
+          <CountdownTimer
+            endsAt={activeTimer.voting_ends_at!}
+            roundName={ROUND_NAMES[activeTimer.round]}
+            onExpire={handleTimerExpire}
+          />
+        </div>
+      )}
+
       {/* Mobile: round tabs + stacked cards */}
       <div className="md:hidden">
         <div className="flex overflow-x-auto gap-1 mb-5 pb-1">

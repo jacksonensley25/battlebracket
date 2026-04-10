@@ -25,6 +25,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Matchup not found' }, { status: 404 });
   }
 
+  // Check if timer has expired
+  if (matchup.voting_ends_at && new Date(matchup.voting_ends_at) < new Date()) {
+    await supabase
+      .from('matchups')
+      .update({ voting_open: false, voting_ends_at: null })
+      .eq('id', matchupId);
+    return NextResponse.json({ error: 'Voting time has expired' }, { status: 403 });
+  }
+
   if (!matchup.voting_open) {
     return NextResponse.json({ error: 'Voting is closed for this matchup' }, { status: 403 });
   }

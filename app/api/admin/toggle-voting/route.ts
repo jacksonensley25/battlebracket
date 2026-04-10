@@ -16,9 +16,19 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient();
 
+  const updates = open
+    ? {
+        voting_open: true,
+        voting_ends_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      }
+    : {
+        voting_open: false,
+        voting_ends_at: null,
+      };
+
   const { error } = await supabase
     .from('matchups')
-    .update({ voting_open: open })
+    .update(updates)
     .eq('round', round);
 
   if (error) {
