@@ -21,9 +21,21 @@ export default function MatchupCard({ matchup, onVoteSuccess }: MatchupCardProps
   const [localCountB, setLocalCountB] = useState(matchup.vote_count_b ?? 0);
 
   useEffect(() => {
-    const stored = localStorage.getItem(`voted_matchup_${matchup.id}`);
-    if (stored) setVotedBrandId(stored);
-  }, [matchup.id]);
+    const raw = localStorage.getItem(`voted_matchup_${matchup.id}`);
+    if (!raw) return;
+    try {
+      const { brandId, timestamp } = JSON.parse(raw);
+      // Invalidate if votes were reset after this vote was cast
+      if (matchup.votes_reset_at && new Date(timestamp) < new Date(matchup.votes_reset_at)) {
+        localStorage.removeItem(`voted_matchup_${matchup.id}`);
+        return;
+      }
+      setVotedBrandId(brandId);
+    } catch {
+      // Legacy plain string format — treat as valid (no reset timestamp to compare)
+      setVotedBrandId(raw);
+    }
+  }, [matchup.id, matchup.votes_reset_at]);
 
   useEffect(() => {
     setLocalCountA(matchup.vote_count_a ?? 0);
@@ -55,14 +67,14 @@ export default function MatchupCard({ matchup, onVoteSuccess }: MatchupCardProps
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 429) {
-          localStorage.setItem(`voted_matchup_${matchup.id}`, selectedBrandId);
+          localStorage.setItem(`voted_matchup_${matchup.id}`, JSON.stringify({ brandId: selectedBrandId, timestamp: new Date().toISOString() }));
           setVotedBrandId(selectedBrandId);
         } else {
           alert(data.error ?? 'Failed to vote. Please try again.');
         }
         return;
       }
-      localStorage.setItem(`voted_matchup_${matchup.id}`, selectedBrandId);
+      localStorage.setItem(`voted_matchup_${matchup.id}`, JSON.stringify({ brandId: selectedBrandId, timestamp: new Date().toISOString() }));
       setVotedBrandId(selectedBrandId);
       setLocalCountA(data.voteCountA);
       setLocalCountB(data.voteCountB);

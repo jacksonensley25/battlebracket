@@ -67,13 +67,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Return updated vote counts
-  const { data: votes } = await supabase
-    .from('votes')
-    .select('brand_id')
-    .eq('matchup_id', matchupId);
+  const [{ count: voteCountA }, { count: voteCountB }] = await Promise.all([
+    supabase.from('votes').select('*', { count: 'exact', head: true }).eq('matchup_id', matchupId).eq('brand_id', matchup.brand_a_id),
+    supabase.from('votes').select('*', { count: 'exact', head: true }).eq('matchup_id', matchupId).eq('brand_id', matchup.brand_b_id),
+  ]);
 
-  const voteCountA = votes?.filter((v) => v.brand_id === matchup.brand_a_id).length ?? 0;
-  const voteCountB = votes?.filter((v) => v.brand_id === matchup.brand_b_id).length ?? 0;
-
-  return NextResponse.json({ voteCountA, voteCountB });
+  return NextResponse.json({ voteCountA: voteCountA ?? 0, voteCountB: voteCountB ?? 0 });
 }

@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   const [votesRes, fpRes, matchupRes] = await Promise.all([
     supabase.from('votes').delete().eq('matchup_id', matchupId),
     supabase.from('vote_fingerprints').delete().eq('matchup_id', matchupId),
-    supabase.from('matchups').update({ winner_id: null }).eq('id', matchupId),
+    supabase.from('matchups').update({ winner_id: null, votes_reset_at: new Date().toISOString() }).eq('id', matchupId),
   ]);
 
   if (votesRes.error || fpRes.error || matchupRes.error) {

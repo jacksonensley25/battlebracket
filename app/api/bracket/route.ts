@@ -21,13 +21,10 @@ export async function GET() {
   // Attach vote counts
   const matchupsWithCounts = await Promise.all(
     (matchupsRes.data ?? []).map(async (matchup) => {
-      const { data: votes } = await supabase
-        .from('votes')
-        .select('brand_id')
-        .eq('matchup_id', matchup.id);
-
-      const voteCountA = votes?.filter((v) => v.brand_id === matchup.brand_a_id).length ?? 0;
-      const voteCountB = votes?.filter((v) => v.brand_id === matchup.brand_b_id).length ?? 0;
+      const [{ count: voteCountA }, { count: voteCountB }] = await Promise.all([
+        supabase.from('votes').select('*', { count: 'exact', head: true }).eq('matchup_id', matchup.id).eq('brand_id', matchup.brand_a_id),
+        supabase.from('votes').select('*', { count: 'exact', head: true }).eq('matchup_id', matchup.id).eq('brand_id', matchup.brand_b_id),
+      ]);
 
       const brands = brandsRes.data ?? [];
       return {
@@ -35,8 +32,8 @@ export async function GET() {
         brand_a: brands.find((b) => b.id === matchup.brand_a_id) ?? null,
         brand_b: brands.find((b) => b.id === matchup.brand_b_id) ?? null,
         winner: brands.find((b) => b.id === matchup.winner_id) ?? null,
-        vote_count_a: voteCountA,
-        vote_count_b: voteCountB,
+        vote_count_a: voteCountA ?? 0,
+        vote_count_b: voteCountB ?? 0,
       };
     })
   );
